@@ -1,23 +1,33 @@
-from flask_sqlalchemy import SQLAlchemy
+from src.models.database import notes
 from datetime import datetime
-from src.models.user import db
+from bson import ObjectId
 
-class Note(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<Note {self.title}>'
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'title': self.title,
-            'content': self.content,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+class Note:
+    @staticmethod
+    def create(title, content):
+        note = {
+            'title': title,
+            'content': content,
+            'created_at': datetime.utcnow(),
+            'updated_at': datetime.utcnow()
         }
+        result = notes.insert_one(note)
+        note['_id'] = result.inserted_id
+        return note
+
+    @staticmethod
+    def find_by_id(note_id):
+        return notes.find_one({'_id': ObjectId(note_id)})
+
+    @staticmethod
+    def update(note_id, title, content):
+        return notes.update_one({'_id': ObjectId(note_id)}, {'$set': {'title': title, 'content': content, 'updated_at': datetime.utcnow()}})
+
+    @staticmethod
+    def delete(note_id):
+        return notes.delete_one({'_id': ObjectId(note_id)})
+
+    @staticmethod
+    def list_all():
+        return list(notes.find())
 

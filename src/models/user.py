@@ -1,18 +1,26 @@
-from flask_sqlalchemy import SQLAlchemy
+from src.models.database import users
+from bson import ObjectId
 
-db = SQLAlchemy()
+class User:
+    @staticmethod
+    def create(username, email):
+        user = {'username': username, 'email': email}
+        result = users.insert_one(user)
+        user['_id'] = result.inserted_id
+        return user
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    @staticmethod
+    def find_by_id(user_id):
+        return users.find_one({'_id': ObjectId(user_id)})
 
-    def __repr__(self):
-        return f'<User {self.username}>'
+    @staticmethod
+    def find_by_username(username):
+        return users.find_one({'username': username})
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'username': self.username,
-            'email': self.email
-        }
+    @staticmethod
+    def find_by_email(email):
+        return users.find_one({'email': email})
+
+    @staticmethod
+    def list_all():
+        return list(users.find())
