@@ -9,6 +9,7 @@ from src.routes.user import user_bp
 from src.routes.note import note_bp
 from src.models.database import client
 import logging
+import traceback
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
@@ -41,6 +42,10 @@ def handle_500(e):
     logging.exception("Internal server error")
     if request.path.startswith('/api'):
         return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
+    # If caller requests debug info via ?debug=1, return the traceback text (temporary)
+    if request.args.get('debug') == '1':
+        tb = traceback.format_exc()
+        return Response(tb, mimetype='text/plain'), 500
     return "Internal Server Error", 500
 
 @app.errorhandler(404)
