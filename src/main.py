@@ -76,5 +76,38 @@ def health_check():
     return jsonify({'ok': True}), 200
 
 
+# Debug endpoint to inspect `public/` presence in the deployed filesystem.
+# This is temporary and can be removed once the deployment issue is resolved.
+@app.route('/api/_debug_public', methods=['GET'])
+def debug_public():
+    # project root is two levels up from this file
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    public_path = os.path.join(project_root, 'public')
+    result = {
+        'project_root': project_root,
+        'public_path': public_path,
+        'public_exists': False,
+        'files': [],
+        'index_head': None,
+    }
+    try:
+        result['public_exists'] = os.path.exists(public_path)
+        if result['public_exists']:
+            try:
+                result['files'] = sorted(os.listdir(public_path))
+            except Exception as e:
+                result['files'] = [f'list_error: {str(e)}']
+            if 'index.html' in result['files']:
+                try:
+                    with open(os.path.join(public_path, 'index.html'), 'r', encoding='utf-8') as f:
+                        result['index_head'] = f.read(512)
+                except Exception as e:
+                    result['index_head'] = f'read_error: {str(e)}'
+    except Exception as e:
+        result['error'] = str(e)
+
+    return jsonify(result), 200
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
