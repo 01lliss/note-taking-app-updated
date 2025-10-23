@@ -52,14 +52,24 @@ def handle_404(e):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    static_folder_path = app.static_folder
-    if static_folder_path is None:
-            return "Static folder not configured", 404
-
-    # 防止静态 catch-all 误处理 /api 路径（通常蓝图会优先，但这里做额外保护）
+    # Prevent the catch-all from serving API paths.
     if path.startswith('api') or request.path.startswith('/api'):
         return abort(404)
 
+    static_folder_path = app.static_folder
+    # If running on Vercel serverless the Flask static folder is disabled;
+    # attempt to find `public/index.html` from the repository root and return it.
+    if static_folder_path is None:
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        public_index = os.path.join(project_root, 'public', 'index.html')
+        if os.path.exists(public_index):
+            # return the file contents as HTML
+            from flask import send_file
+            return send_file(public_index)
+        else:
+            return "index.html not found", 404
+
+    # Normal local static serving path
     if path != "" and os.path.exists(os.path.join(static_folder_path, path)):
         return send_from_directory(static_folder_path, path)
     else:
