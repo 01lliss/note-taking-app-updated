@@ -158,6 +158,25 @@ The application is configured for easy deployment with:
 - `FLASK_ENV`: Set to `development` for debug mode
 - `SECRET_KEY`: Flask secret key for sessions
 
+## 📦 部署到 Vercel
+
+该仓库包含一个 `Dockerfile`，Vercel 会使用容器方式构建并运行应用。部署前请在 Vercel 项目设置中添加以下环境变量：
+
+- `MONGO_URI`（必需）: MongoDB 连接字符串，例如 Atlas 提供的 URI。
+- `DATABASE_NAME`（可选）: 数据库名称，默认 `note_taking_app`。
+- `SECRET_KEY`（可选）: Flask 的秘钥，用于会话等。
+
+部署步骤（使用 Vercel CLI 或通过 Vercel UI）：
+
+1. 登录 Vercel 并新建一个项目，连接到此 Git 仓库。
+2. 在项目设置 -> Environment Variables 中添加上面的变量。
+3. 确保 `vercel.json` 中使用 Docker 构建（已配置）。
+4. 部署（Vercel 会在容器中读取 `PORT` 环境变量并启动 gunicorn）。
+
+本仓库还包含 `.vercelignore` 来排除本地数据库和虚拟环境文件。
+
+可选：如果你希望不使用 Docker，而转为 Vercel 的 Python Serverless（函数）方式，需要将 `src/main.py` 的 Flask app 导出到 `api/index.py` 并按 Vercel Serverless 的要求做少量调整。
+
 ### Database Configuration
 - Database file: `src/database/app.db`
 - Automatic table creation on first run
@@ -206,4 +225,16 @@ Potential improvements for future versions:
 ---
 
 **Built with ❤️ using Flask, SQLite, and modern web technologies**
+
+## 🛠 开发 & 部署小工具
+
+在本地开发时，前端源码保存在 `src/static`，而部署时我们将静态文件放在 `public/` 供 Vercel 托管。可以使用下面的命令把 `src/static` 同步到 `public/`：
+
+```bash
+make sync-static
+# 或者直接运行
+python3 scripts/sync_static.py
+```
+
+建议在每次发布到 Vercel 之前运行一次同步，或者在 CI 中加入此步骤以确保 `public/` 包含最新静态资源。
 

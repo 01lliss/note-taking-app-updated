@@ -13,6 +13,11 @@ import logging
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 
+# If running on Vercel serverless, disable Flask static serving because
+# static files are served from the `public/` folder by Vercel.
+if os.getenv('VERCEL'):
+    app.static_folder = None
+
 # Enable CORS for API routes and allow credentials if frontend needs them
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -63,6 +68,12 @@ def serve(path):
             return send_from_directory(static_folder_path, 'index.html')
         else:
             return "index.html not found", 404
+
+
+# Simple health check for container/platform watchers
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({'ok': True}), 200
 
 
 if __name__ == '__main__':

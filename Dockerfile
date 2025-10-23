@@ -13,8 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . /app
 
-# Expose port (Vercel will handle mapping)
+# Expose is informational; Vercel provides the port via $PORT at runtime
 EXPOSE 5001
 
-# Use gunicorn to run the Flask app
-CMD ["gunicorn", "-b", "0.0.0.0:5001", "src.main:app", "--workers", "2"]
+# Run gunicorn using the PORT environment variable provided by Vercel
+# Use shell form so that $PORT is expanded at container runtime
+CMD ["sh", "-lc", "gunicorn -b 0.0.0.0:$PORT src.main:app --workers 2"]

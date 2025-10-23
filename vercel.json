@@ -1,9 +1,11 @@
 {
   "version": 2,
   "builds": [
-    { "src": "Dockerfile", "use": "@vercel/docker" }
+    { "src": "api/index.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/$1" }
+    { "src": "/api/(.*)", "dest": "/api/index.py" },
+    { "src": "^/(.*)$", "headers": { "cache-control": "public, max-age=0, s-maxage=31536000, stale-while-revalidate=59" }, "dest": "/public/$1" },
+    { "src": "^/(?:.*)$", "dest": "/public/index.html" }
   ]
 }
