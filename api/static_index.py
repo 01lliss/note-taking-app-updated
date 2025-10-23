@@ -83,5 +83,12 @@ INDEX_HTML = r"""
 """
 
 def handler(request, response):
-    response.headers['Content-Type'] = 'text/html; charset=utf-8'
-    response.send(INDEX_HTML.encode('utf-8'))
+    try:
+        response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        response.send(INDEX_HTML.encode('utf-8'))
+    except Exception:
+        import traceback
+        tb = traceback.format_exc()
+        response.status_code = 500
+        response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+        response.send(b"Static index handler error:\n\n" + tb.encode('utf-8'))
