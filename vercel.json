@@ -6,6 +6,7 @@
   { "src": "api/ping.py", "use": "@vercel/python" }
   ],
   "routes": [
+    { "src": "^/api/ping$", "dest": "/api/ping.py" },
     { "src": "/api/(.*)", "dest": "/api/index.py" },
     { "src": "^/$", "dest": "/api/index.py" },
     { "handle": "filesystem" },
