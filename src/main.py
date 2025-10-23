@@ -3,7 +3,7 @@ import sys
 # DON'T CHANGE THIS !!!
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from flask import Flask, send_from_directory, jsonify, request, abort
+from flask import Flask, send_from_directory, jsonify, request, abort, Response
 from flask_cors import CORS
 from src.routes.user import user_bp
 from src.routes.note import note_bp
@@ -67,7 +67,8 @@ def serve(path):
             from flask import send_file
             return send_file(public_index)
         else:
-            return "index.html not found", 404
+            # public/index.html not present in serverless filesystem; return embedded SPA
+            return Response(EMBEDDED_INDEX_HTML, mimetype='text/html')
 
     # Normal local static serving path
     if path != "" and os.path.exists(os.path.join(static_folder_path, path)):
@@ -117,6 +118,27 @@ def debug_public():
         result['error'] = str(e)
 
     return jsonify(result), 200
+
+
+# Embedded fallback index.html (small/sanitized) used when `public/index.html` isn't
+# present in the serverless filesystem. This is a pragmatic fallback for environments
+# where the static directory isn't available during function invocation.
+EMBEDDED_INDEX_HTML = """
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>NoteTaker</title>
+    </head>
+    <body>
+        <h1>NoteTaker</h1>
+        <p>If you see this, the embedded fallback index was served because the `public/` directory
+        was not available in the serverless runtime. For full static assets, ensure `public/` is
+        included in the deployment artifact or adjust Vercel build settings.</p>
+    </body>
+</html>
+"""
 
 
 if __name__ == '__main__':
