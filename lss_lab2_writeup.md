@@ -1,1 +1,4 @@
-
+The experiment requires connecting this app to a cloud database, adding translation and note-generation functionalities, and deploying it on Vercel.
+First, I opened MongoDB, created my own account using Gmail, and set up a cloud database. Then, I connected the created project to VS Code and established a connection using the URI. It's important to note that the password you set should not contain symbols; otherwise, there will be issues during later compilation.
+The URI can be found by selecting the option for VS Code in the cluster you created.
+Then I added automatic translation and automatic note-generation functions to the existing code. Before running the code, it's important to check whether the required packages and libraries are available in the runtime environment to avoid errors later.During this process, there were errors in the code, but I used AI to debug them.
