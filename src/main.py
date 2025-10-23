@@ -22,6 +22,28 @@ if os.getenv('VERCEL'):
 # Enable CORS for API routes and allow credentials if frontend needs them
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
+
+# Temporary WSGI middleware to capture unhandled exceptions and return traceback
+# This helps debug FUNCTION_INVOCATION_FAILED in the serverless runtime.
+class ExceptionMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        try:
+            return self.app(environ, start_response)
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            body = tb.encode('utf-8')
+            status = '500 Internal Server Error'
+            headers = [('Content-Type', 'text/plain; charset=utf-8'), ('Content-Length', str(len(body)))]
+            start_response(status, headers)
+            return [body]
+
+# Wrap the WSGI app with the middleware in debug deployments
+app.wsgi_app = ExceptionMiddleware(app.wsgi_app)
+
 # register blueprints
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(note_bp, url_prefix='/api')
