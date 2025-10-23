@@ -120,6 +120,13 @@ def debug_public():
     return jsonify(result), 200
 
 
+@app.route('/api/_debug_env', methods=['GET'])
+def debug_env():
+    keys = ['VERCEL', 'VERCEL_ENV', 'VERCEL_REGION', 'PYTHONPATH', 'PATH', 'HOME']
+    env = {k: os.environ.get(k) for k in keys}
+    return jsonify({'env': env}), 200
+
+
 # Embedded fallback index.html (small/sanitized) used when `public/index.html` isn't
 # present in the serverless filesystem. This is a pragmatic fallback for environments
 # where the static directory isn't available during function invocation.
