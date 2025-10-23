@@ -6,9 +6,9 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.py" },
-    { "src": "^/$", "dest": "/api/index.py" },
+    { "src": "^/$", "dest": "/api/static_index.py" },
     { "handle": "filesystem" },
     { "src": "^/(.*)$", "headers": { "cache-control": "public, max-age=0, s-maxage=31536000, stale-while-revalidate=59" }, "dest": "/$1" },
-    { "src": "^/(?:.*)$", "dest": "/api/index.py" }
+    { "src": "^/(?:.*)$", "dest": "/api/static_index.py" }
   ]
 }
